@@ -9,7 +9,7 @@ jobs:
       - name: Create Pull Request
         id: cpr
         uses: actions/github-script@v6
-        with: 
+        with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             try {
@@ -27,10 +27,20 @@ jobs:
                 pull_number: result.data.number,
                 merge_method: 'merge',
               })
+              return {
+                success: true
+              }
             } catch (error) {
               console.log('error: ', error.errors);
               if (error.errors[0].message != 'No commits between master and release') {
                 core.setFailed('Action failed')
               }
+              return {
+                success: false,
+                error: error
+              }
             }
-
+      - name: Handle Error
+        run: |
+          echo "${{ steps.cpr.outputs.success }}"
+          echo "${{ steps.cpr.outputs.error }}"
