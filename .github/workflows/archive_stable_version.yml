@@ -42,5 +42,4 @@ jobs:
             }
       - name: Handle Error
         run: |
-          echo "${{ steps.cpr.outputs.success }}"
-          echo "${{ steps.cpr.outputs.error }}"
+          echo "${{ steps.cpr.outputs.result }}"
