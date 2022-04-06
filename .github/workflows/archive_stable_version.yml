@@ -32,10 +32,6 @@ jobs:
                 success: true
               }
             } catch (error) {
-              console.log('error: ', error.errors);
-              if (error.errors[0].message != 'No commits between master and release') {
-                core.setFailed('Action failed')
-              }
               return {
                 success: false,
                 error: error
