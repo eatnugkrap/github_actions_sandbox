@@ -9,8 +9,10 @@ jobs:
       - name: Create Pull Request
         id: cpr
         uses: actions/github-script@v6
-        with: |
-          try {
+        with: 
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
               const result = await github.rest.pulls.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
