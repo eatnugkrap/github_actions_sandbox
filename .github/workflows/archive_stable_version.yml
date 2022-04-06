@@ -6,8 +6,31 @@ jobs:
   update-dep:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
+        id: cpr
+        uses: actions/github-script@v3
         with:
-            branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            try {
+              const result = await github.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: 'automerge',
+                title: '[auto-created] Daily up-to-date main branch',
+                head: 'release',
+                base: 'master',
+              });
+              const mergeResult = await github.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: result.data.number,
+                merge_method: 'merge',
+              })
+            } catch (error) {
+              console.log('error: ', error.errors);
+              if (error.errors[0].message != 'No commits between master and release') {
+                core.setFailed('Action failed')
+              }
+            }
