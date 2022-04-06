@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: release
+          ref: main
           token: ${{ secrets.PAT }}
       - name: Create Pull Request
         id: cpr
@@ -19,7 +19,7 @@ jobs:
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           signoff: false
-          branch: main
+          branch: release
           title: "[Example] Update report"
           body: |
             Update report
