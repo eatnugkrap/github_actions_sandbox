@@ -1,43 +1,51 @@
 name: Archive Stable Version
+
 on:
   workflow_dispatch:
+  schedule:
+    - cron: 0 19 * * *
 
 jobs:
-  update-dep:
+  createPullReuqest:
     runs-on: ubuntu-latest
+
     steps:
       - name: Create Pull Request
         id: cpr
-        uses: actions/github-script@v6
+        uses: actions/github-script@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
           script: |
             try {
-              throw Error('some error')
-              const result = await github.rest.pulls.create({
+              const result = await github.pulls.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 labels: 'automerge',
                 title: '[auto-created] Daily up-to-date main branch',
                 head: 'release',
-                base: 'main',
+                base: 'master',
               });
-              const mergeResult = await github.rest.pulls.merge({
+              const mergeResult = await github.pulls.merge({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: result.data.number,
                 merge_method: 'merge',
               })
-              return {
-                success: true
-              }
             } catch (error) {
-              return {
-                success: false,
-                error: error
+              console.log('error: ', error.errors);
+              if (error.errors[0].message != 'No commits between master and release') {
+                core.setFailed('Action failed')
               }
             }
-      - name: Handle Error
-        run: |
-          echo "${{ steps.cpr.outputs.result }}"
-          echo "${{ steps.cpr.outputs.result.error }}"
+
+      - name: Slack notification on failure
+        uses: Ilshidur/action-slack@2.1.0
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_MAKERS }}
+          SLACK_USERNAME: ${{ github.actor }}
+          SLACK_AVATAR: sender
+          SLACK_CHANNEL: makers
+        if: failure()
+        with:
+          args: "{{ GITHUB_REPOSITORY }} 저장소 daily release -> main 머지 작업 실패. 확인 요망."
