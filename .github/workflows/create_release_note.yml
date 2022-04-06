@@ -1,5 +1,9 @@
 name: Create Release Note
 on:
+  workflow_run:
+    workflows: ["Archive Stable Version"]
+    types:
+      - completed
   push:
     branches:
       - main
