@@ -12,13 +12,13 @@ jobs:
     steps:
       - name: Create Pull Request
         id: cpr
-        uses: actions/github-script@v3
+        uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           result-encoding: string
           script: |
             try {
-              const result = await github.pulls.create({
+              const result = await github.rest.pulls.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 labels: 'automerge',
@@ -26,7 +26,7 @@ jobs:
                 head: 'release',
                 base: 'master',
               });
-              const mergeResult = await github.pulls.merge({
+              const mergeResult = await github.rest.pulls.merge({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: result.data.number,
